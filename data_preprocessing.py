@@ -9,9 +9,9 @@ FILENAME = 'eng-fra.txt'
 class preprocess:
     def __init__(self):
         self.word2index = {}
-        self.index2word = {0:"SOS", 1:"EOS"}
+        self.index2word = {0:"SOS", 1:"EOS", 2:"UNK"}
         self.wordCount = {}
-        self.n_words = 2
+        self.n_words = 3
 
     def addSentence(self, sentence:str):
         for word in sentence.split(' '):
