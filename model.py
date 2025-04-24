@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+import torch.nn.functional as F
 
 class Encoder(nn.Module):
     def __init__(self, input_size, hidden_size):
@@ -53,3 +54,7 @@ class Decoder(nn.Module):
             else:
                 _, index = decoder_output.topk(1)
                 decoder_input = index.squeeze(-1).detach()
+        
+        decoder_outputs = torch.cat(decoder_outputs, dim=1)
+        decoder_outputs = F.log_softmax(decoder_outputs, -1)
+        return(decoder_outputs, decoder_hidden, None)
