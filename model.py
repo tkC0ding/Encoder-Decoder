@@ -56,7 +56,7 @@ class Decoder(nn.Module):
 
         output, hidden = self.gru(embeddings, hidden)
         output = self.out(output)
-        return(output, hidden)
+        return(output, hidden, allignment_scores)
     
     def forward(self, encoder_outputs, encoder_hidden, target_tensor=None):
         encoder_outputs, encoder_hidden = encoder_outputs.to(device), encoder_hidden.to(device)
@@ -67,7 +67,7 @@ class Decoder(nn.Module):
         decoder_outputs = []
 
         for i in range(self.maxlength):
-            decoder_output, decoder_hidden = self.single_step(decoder_input, decoder_hidden, updated_encodder_hidden)
+            decoder_output, decoder_hidden, allignment_scores = self.single_step(decoder_input, decoder_hidden, updated_encodder_hidden)
             decoder_outputs.append(decoder_output)
 
             if target_tensor is not None:
@@ -78,4 +78,4 @@ class Decoder(nn.Module):
         
         decoder_outputs = torch.cat(decoder_outputs, dim=1)
         decoder_outputs = F.log_softmax(decoder_outputs, -1)
-        return(decoder_outputs, decoder_hidden, None)
+        return(decoder_outputs, decoder_hidden, allignment_scores)
