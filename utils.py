@@ -1,9 +1,15 @@
 import unicodedata
 import re
 import torch
+import numpy as np
+from torch.utils.data import TensorDataset, RandomSampler
+from torch.utils.data.dataloader import DataLoader
 
 SOS_token = 0
 EOS_token = 1
+MAX_LENGTH = 100
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def unicodeToAscii(s):
     return ''.join(
@@ -35,8 +41,28 @@ def strToTensor(s, lang):
     return torch.tensor(idx, dtype=torch.float32).view(1,-1)
 
 def pairToTensor(pair, input_lang, output_lang):
-    input_idx = strToTensor(pair[0], input_lang)
-    target_idx = strToTensor(pair[1], output_lang)
+    input_idx = strToTensor(pair[0], input_lang).to(device)
+    target_idx = strToTensor(pair[1], output_lang).to(device)
 
     return (input_idx, target_idx)
 
+def data_loader(input_lang, output_lang, pairs, batch_size):
+    n = len(pairs)
+
+    input_ids = np.zeros((n, MAX_LENGTH), dtype=np.float32)
+    target_ids = np.zeros((n, MAX_LENGTH), dtype=np.float32)
+
+    for i, (inp, tar) in enumerate(pairs):
+        inp_i = strToidx(inp, input_lang)
+        out_i = strToidx(tar, output_lang)
+
+        inp_i.append(EOS_token)
+        out_i.append(EOS_token)
+
+        input_ids[i, :len(inp_i)] = inp_i
+        target_ids[i, :len(out_i)] = out_i
+
+    train_data = TensorDataset(torch.tensor(input_ids, device=device), torch.tensor(target_ids, device=device))
+    train_sampler = RandomSampler(train_data)
+    train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler)
+    return input_lang, output_lang, train_loader
