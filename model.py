@@ -23,7 +23,7 @@ class Decoder(nn.Module):
         super().__init__()
         self.maxlength = 20
         self.embedding = nn.Embedding(output_size, hidden_size)
-        self.gru = nn.GRU(hidden_size, hidden_size, 4, batch_first=True)
+        self.gru = nn.GRU(2*hidden_size, hidden_size, 4, batch_first=True)
         self.out = nn.Linear(hidden_size, output_size)
         self.RelU = nn.ReLU()
         self.layer_1 = nn.Linear(2*hidden_size, 3)
@@ -40,8 +40,15 @@ class Decoder(nn.Module):
         output = self.layer_2(output)
         allignment_scores = self.softmax(output)
 
+        C = (encoder_hidden * allignment_scores).sum(dim=0)
+
         embeddings = self.embedding(input)
         embeddings = self.RelU(embeddings)
+
+        fake = torch.zeros_like(input)
+        fake[:, :] = C
+        embeddings = torch.cat([embeddings, fake])
+
         output, hidden = self.gru(embeddings, hidden)
         output = self.out(output)
         return(output, hidden)
