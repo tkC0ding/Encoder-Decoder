@@ -2,6 +2,8 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 class Encoder(nn.Module):
     def __init__(self, input_size, hidden_size):
         super().__init__()
@@ -11,6 +13,7 @@ class Encoder(nn.Module):
 
         self.embedding = nn.Embedding(input_size, hidden_size)
         self.gru = nn.GRU(hidden_size, hidden_size, 4, batch_first=True)
+        nn.ModuleList([self.embedding, self.gru])
     
     def forward(self, input):
         embedded = self.embedding(input)
@@ -30,9 +33,11 @@ class Decoder(nn.Module):
         self.layer_2 = nn.Linear(3, 1)
         self.softmax = nn.Softmax(dim=0)
 
+        nn.ModuleList([self.embedding, self.gru, self.out, self.RelU, self.layer_1, self.layer_2, self.softmax])
+
     def single_step(self, input, hidden, encoder_hidden):
 
-        a = torch.zeros_like(encoder_hidden)
+        a = torch.zeros_like(encoder_hidden).to(device)
         a[:] = hidden[0][-1]
         enc = torch.cat([a, encoder_hidden], dim=1)
 
@@ -45,7 +50,7 @@ class Decoder(nn.Module):
         embeddings = self.embedding(input)
         embeddings = self.RelU(embeddings)
 
-        fake = torch.zeros_like(input)
+        fake = torch.zeros_like(input).to(device)
         fake[:, :] = C
         embeddings = torch.cat([embeddings, fake])
 
@@ -54,9 +59,10 @@ class Decoder(nn.Module):
         return(output, hidden)
     
     def forward(self, encoder_outputs, encoder_hidden, target_tensor=None):
+        encoder_outputs, encoder_hidden = encoder_outputs.to(device), encoder_hidden.to(device)
         batch_size = encoder_outputs.shape[0]
         updated_encodder_hidden = encoder_hidden[0]
-        decoder_input = torch.empty((batch_size, 1), dtype=torch.int32).fill_(0)
+        decoder_input = torch.empty((batch_size, 1), dtype=torch.int32).fill_(0).to(device)
         decoder_hidden = encoder_hidden
         decoder_outputs = []
 
@@ -65,7 +71,7 @@ class Decoder(nn.Module):
             decoder_outputs.append(decoder_output)
 
             if target_tensor is not None:
-                decoder_input = target_tensor[:, i].unsqueeze(1)
+                decoder_input = target_tensor[:, i].unsqueeze(1).to(device)
             else:
                 _, index = decoder_output.topk(1)
                 decoder_input = index.squeeze(-1).detach()
