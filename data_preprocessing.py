@@ -1,7 +1,6 @@
-import unicodedata
-import re
 import pickle
 import os
+from utils import readData
 
 DATAFOLDER = 'data'
 FILENAME = 'eng-fra.txt'
@@ -25,22 +24,6 @@ class preprocess:
             self.n_words += 1
         else:
             self.wordCount[word] += 1
-
-def unicodeToAscii(s):
-    return ''.join(
-        c for c in unicodedata.normalize('NFD', s)
-        if unicodedata.category(c) != 'Mn'
-    )
-
-def normalize(s:str):
-    s = unicodeToAscii(s.lower().strip())
-    s = re.sub(r"([.!?])", r" \1", s)
-    s = re.sub(r"[^a-zA-Z!?]+", r" ", s)
-    return s.strip()
-
-def readData(filepath:str):
-    return([[normalize(j) for j in i] for i in [s.split('\t') for l in open(filepath) for s in l.strip('\n').split('\n')]])
-
 
 def main(filepath):
     pairs = readData(filepath)
