@@ -52,7 +52,7 @@ class Decoder(nn.Module):
 
         fake = torch.zeros_like(input).to(device)
         fake[:, :] = C
-        embeddings = torch.cat([embeddings, fake])
+        embeddings = torch.cat([embeddings, fake], dim=1)
 
         output, hidden = self.gru(embeddings, hidden)
         output = self.out(output)
