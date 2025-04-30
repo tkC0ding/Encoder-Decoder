@@ -24,7 +24,7 @@ class Encoder(nn.Module):
 class Decoder(nn.Module):
     def __init__(self, hidden_size, output_size):
         super().__init__()
-        self.maxlength = 20
+        self.maxlength = 100
         self.embedding = nn.Embedding(output_size, hidden_size)
         self.gru = nn.GRU(2*hidden_size, hidden_size, 4, batch_first=True)
         self.out = nn.Linear(hidden_size, output_size)
@@ -50,9 +50,9 @@ class Decoder(nn.Module):
         embeddings = self.embedding(input)
         embeddings = self.RelU(embeddings)
 
-        fake = torch.zeros_like(input).to(device)
+        fake = torch.zeros_like(embeddings).to(device)
         fake[:, :] = C
-        embeddings = torch.cat([embeddings, fake], dim=1)
+        embeddings = torch.cat([embeddings, fake], dim=-1)
 
         output, hidden = self.gru(embeddings, hidden)
         output = self.out(output)

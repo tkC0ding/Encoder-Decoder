@@ -23,7 +23,6 @@ def train_epoch(dataloader, encoder, decoder, encoder_optimizer, decoder_optimiz
 
         encoder_optimizer.step()
         decoder_optimizer.step()
-
         total_loss += loss.item()
 
     return total_loss/len(dataloader)

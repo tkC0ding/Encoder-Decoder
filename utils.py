@@ -68,7 +68,7 @@ def data_loader(input_lang, output_lang, pairs, batch_size):
         input_ids[i, :len(inp_i)] = inp_i
         target_ids[i, :len(out_i)] = out_i
 
-    train_data = TensorDataset(torch.tensor(input_ids, device=device), torch.tensor(target_ids, device=device))
+    train_data = TensorDataset(torch.LongTensor(input_ids, device="cpu"), torch.LongTensor(target_ids, device="cpu"))
     train_sampler = RandomSampler(train_data)
     train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler)
     return input_lang, output_lang, train_loader
