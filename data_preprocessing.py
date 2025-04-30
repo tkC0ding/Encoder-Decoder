@@ -33,7 +33,7 @@ def main(filepath):
         input_lang.addSentence(i[0])
         output_lang.addSentence(i[1])
     
-    with open(os.path.join(DATAFOLDER, 'preprocessed.pkl'), 'wb') as file:
+    with open(os.path.join(DATAFOLDER, 'data_preprocessed.pkl'), 'wb') as file:
         data = [input_lang, output_lang, pairs]
         pickle.dump(data, file)
     

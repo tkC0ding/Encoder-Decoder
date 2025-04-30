@@ -4,7 +4,13 @@ import torch
 import numpy as np
 from torch.utils.data import TensorDataset, RandomSampler
 from torch.utils.data.dataloader import DataLoader
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+import numpy as np
+import time
+import math
 
+plt.switch_backend('agg')
 SOS_token = 0
 EOS_token = 1
 MAX_LENGTH = 100
@@ -21,7 +27,7 @@ def normalize(s:str):
     s = unicodeToAscii(s.lower().strip())
     s = re.sub(r"([.!?])", r" \1", s)
     s = re.sub(r"[^a-zA-Z!?]+", r" ", s)
-    return s.strip()
+    return s.strip()    # this locator puts ticks at regular intervals
 
 def readData(filepath:str):
     return([[normalize(j) for j in i] for i in [s.split('\t') for l in open(filepath) for s in l.strip('\n').split('\n')]])
@@ -66,3 +72,22 @@ def data_loader(input_lang, output_lang, pairs, batch_size):
     train_sampler = RandomSampler(train_data)
     train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler)
     return input_lang, output_lang, train_loader
+
+def showPlot(points):
+    plt.figure()
+    fig, ax = plt.subplots()
+    loc = ticker.MultipleLocator(base=0.2)
+    ax.yaxis.set_major_locator(loc)
+    plt.plot(points)
+
+def asMinutes(s):
+    m = math.floor(s / 60)
+    s -= m * 60
+    return '%dm %ds' % (m, s)
+
+def timeSince(since, percent):
+    now = time.time()
+    s = now - since
+    es = s / (percent)
+    rs = es - s
+    return '%s (- %s)' % (asMinutes(s), asMinutes(rs))
