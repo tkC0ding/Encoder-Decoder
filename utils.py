@@ -27,7 +27,7 @@ def normalize(s:str):
     s = unicodeToAscii(s.lower().strip())
     s = re.sub(r"([.!?])", r" \1", s)
     s = re.sub(r"[^a-zA-Z!?]+", r" ", s)
-    return s.strip()    # this locator puts ticks at regular intervals
+    return s.strip()
 
 def readData(filepath:str):
     return([[normalize(j) for j in i] for i in [s.split('\t') for l in open(filepath) for s in l.strip('\n').split('\n')]])
@@ -44,7 +44,7 @@ def strToidx(s, lang):
 def strToTensor(s, lang):
     idx = strToidx(s, lang)
     idx.append(EOS_token)
-    return torch.tensor(idx, dtype=torch.float32).view(1,-1)
+    return torch.tensor(idx, dtype=torch.long).view(1,-1)
 
 def pairToTensor(pair, input_lang, output_lang):
     input_idx = strToTensor(pair[0], input_lang).to(device)

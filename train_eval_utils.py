@@ -8,6 +8,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def train_epoch(dataloader, encoder, decoder, encoder_optimizer, decoder_optimizer, criterion):
     total_loss = 0
+    print(len(dataloader))
     for data in dataloader:
         input_tensor, output_tensor = data
         input_tensor, output_tensor = input_tensor.to(device), output_tensor.to(device)
