@@ -22,9 +22,9 @@ pairs = data['pairs']
 input_lang.from_dict(input_data)
 output_lang.from_dict(output_data)
 
-input_lang, output_lang, train_dataloader = data_loader(input_lang, output_lang, pairs, batch_size)
+input_lang, output_lang, train_dataloader, val_loader, test_loader = data_loader(input_lang, output_lang, pairs, batch_size)
 
 encoder = Encoder(input_lang.n_words, hidden_size).to(device)
 decoder = Decoder(hidden_size, output_lang.n_words).to(device)
 
-train(train_dataloader, encoder, decoder, 80, print_every=5, plot_every=5)
+train(train_dataloader, val_loader, encoder, decoder, 80, print_every=5, plot_every=5)

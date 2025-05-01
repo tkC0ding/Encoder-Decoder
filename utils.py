@@ -2,7 +2,7 @@ import unicodedata
 import re
 import torch
 import numpy as np
-from torch.utils.data import TensorDataset, RandomSampler
+from torch.utils.data import TensorDataset, RandomSampler, Subset
 from torch.utils.data.dataloader import DataLoader
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -52,7 +52,7 @@ def pairToTensor(pair, input_lang, output_lang):
 
     return (input_idx, target_idx)
 
-def data_loader(input_lang, output_lang, pairs, batch_size):
+def data_loader(input_lang, output_lang, pairs, batch_size, train_ratio=0.4, val_ratio=0.2):
     n = len(pairs)
 
     input_ids = np.zeros((n, MAX_LENGTH), dtype=np.float32)
@@ -68,10 +68,26 @@ def data_loader(input_lang, output_lang, pairs, batch_size):
         input_ids[i, :len(inp_i)] = inp_i
         target_ids[i, :len(out_i)] = out_i
 
-    train_data = TensorDataset(torch.LongTensor(input_ids, device="cpu"), torch.LongTensor(target_ids, device="cpu"))
-    train_sampler = RandomSampler(train_data)
-    train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler)
-    return input_lang, output_lang, train_loader
+    data = TensorDataset(torch.LongTensor(input_ids, device="cpu"), torch.LongTensor(target_ids, device="cpu"))
+
+    total = len(data)
+    indicies = torch.randperm(total)
+    train_end = int(train_ratio*total)
+    val_end = train_end + int(val_ratio * total)
+
+    train_indices = indicies[:train_end]
+    val_indices = indicies[train_end:val_end]
+    test_indices = indicies[val_end:]
+
+    train_dataset = Subset(data, train_indices)
+    val_dataset = Subset(data, val_indices)
+    test_dataset = Subset(data, test_indices)
+
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+
+    return input_lang, output_lang, train_loader, val_loader, test_loader
 
 def showPlot(points):
     plt.figure()
