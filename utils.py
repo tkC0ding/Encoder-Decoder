@@ -83,8 +83,8 @@ def data_loader(input_lang, output_lang, pairs, batch_size, train_ratio=0.4, val
     val_dataset = Subset(data, val_indices)
     test_dataset = Subset(data, test_indices)
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, pin_memory=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
     return input_lang, output_lang, train_loader, val_loader, test_loader

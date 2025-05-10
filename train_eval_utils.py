@@ -39,7 +39,6 @@ def val_epoch(dataloader, encoder, decoder, criterion):
             decoder_outputs, _, attention_weights = decoder(encoder_outputs, encoder_hidden, output_tensor)
 
             loss = criterion(decoder_outputs.view(-1, decoder_outputs.size(-1)), output_tensor.view(-1))
-            loss.backward()
 
             total_loss += loss.item()
 
